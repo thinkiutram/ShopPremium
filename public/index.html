@@ -3,197 +3,279 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shop Premium</title>
+    <title>Shop Premium - Mua Tài Khoản Bản Quyền Tự Động</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col justify-between">
-    <div class="max-w-md mx-auto w-full p-4 flex-grow flex flex-col justify-center">
-        
-        <!-- MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ -->
-        <div id="auth-section" class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl">
-            <h1 class="text-2xl font-bold text-center mb-2 text-white">Shop Premium</h1>
-            <p class="text-sm text-center text-gray-400 mb-6">Hệ thống tự động chính chủ</p>
-            
-            <div class="flex bg-gray-800 p-1 rounded-xl mb-6">
-                <button onclick="switchTab('login')" id="tab-login-btn" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white transition">Đăng Nhập</button>
-                <button onclick="switchTab('register')" id="tab-register-btn" class="flex-1 py-2 text-sm font-semibold rounded-lg text-gray-400 transition">Đăng Ký</button>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans flex flex-col justify-between">
+
+    <!-- Header / Navbar -->
+    <header class="border-b border-slate-800 bg-slate-950/70 backdrop-blur sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-crown text-yellow-400 text-2xl"></i>
+                <span class="text-xl font-bold bg-gradient-to-r from-yellow-400 to-amber-200 bg-clip-text text-transparent">ShopPremium</span>
             </div>
 
-            <div id="error-msg" class="hidden mb-4 p-3 bg-red-950/50 border border-red-800 text-red-300 text-sm rounded-xl text-center"></div>
+            <!-- Auth Status -->
+            <div id="authSection" class="flex items-center space-x-3">
+                <button onclick="openModal('loginModal')" class="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white transition">Đăng nhập</button>
+                <button onclick="openModal('registerModal')" class="px-4 py-2 text-sm font-medium bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white shadow-lg shadow-indigo-600/30 transition">Đăng ký</button>
+            </div>
 
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1">Tên đăng nhập</label>
-                    <input type="text" id="username" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500" placeholder="Nhập tên đăng nhập">
+            <div id="userSection" class="hidden flex items-center space-x-4">
+                <div class="bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700 flex items-center space-x-2">
+                    <i class="fa-solid fa-wallet text-emerald-400"></i>
+                    <span id="userBalance" class="text-emerald-400 font-bold text-sm">0đ</span>
                 </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-400 mb-1">Mật khẩu</label>
-                    <input type="password" id="password" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500" placeholder="Nhập mật khẩu">
+                <div class="flex items-center space-x-2">
+                    <i class="fa-solid fa-circle-user text-indigo-400 text-lg"></i>
+                    <span id="displayUsername" class="font-medium text-sm text-slate-200">User</span>
                 </div>
-                <button onclick="handleSubmit()" id="submit-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-blue-600/30">Đăng Nhập</button>
+                <button onclick="logout()" class="text-slate-400 hover:text-rose-400 text-sm p-1" title="Đăng xuất">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
             </div>
         </div>
+    </header>
 
-        <!-- MÀN HÌNH CHÍNH SAU KHI ĐĂNG NHẬP -->
-        <div id="dashboard-section" class="hidden space-y-4">
-            <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex justify-between items-center shadow-xl">
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full">
+        <!-- Banner -->
+        <div class="bg-gradient-to-r from-indigo-900/60 to-purple-900/60 border border-indigo-500/20 rounded-2xl p-6 md:p-8 mb-10 shadow-xl">
+            <h1 class="text-2xl md:text-3xl font-extrabold text-white mb-2">Hệ Thống Mua Dịch Vụ Tự Động 24/7</h1>
+            <p class="text-slate-300 text-sm md:text-base mb-4">Giao dịch tức thì - Nạp tiền ngân hàng ACB tự động duyệt số dư trong vài giây.</p>
+            <button onclick="openTopupModal()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 rounded-xl text-white font-medium text-sm inline-flex items-center space-x-2 shadow-lg shadow-emerald-600/30 transition">
+                <i class="fa-solid fa-plus-circle"></i>
+                <span>Nạp Tiền Tự Động</span>
+            </button>
+        </div>
+
+        <!-- Danh sách Dịch vụ -->
+        <h2 class="text-xl font-bold mb-6 flex items-center space-x-2 text-slate-200">
+            <i class="fa-solid fa-fire text-amber-500"></i>
+            <span>Sản Phẩm Nổi Bật</span>
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Sản phẩm 1 -->
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 flex flex-col justify-between hover:border-slate-600 transition">
                 <div>
-                    <p class="text-xs text-gray-400">Xin chào,</p>
-                    <h2 id="user-display" class="text-lg font-bold text-white"></h2>
-                    <span class="text-xs bg-blue-950 text-blue-400 px-2 py-0.5 rounded-full border border-blue-800">Hệ thống tự động</span>
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="p-3 bg-red-500/10 text-red-400 rounded-xl text-xl"><i class="fa-solid fa-film"></i></span>
+                        <span class="text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full font-medium">Còn hàng</span>
+                    </div>
+                    <h3 class="font-bold text-lg text-white mb-1">Netflix Premium 4K UHD</h3>
+                    <p class="text-slate-400 text-xs mb-4">Tài khoản gói 1 tháng - Xem 4K Ultra HD không giới hạn.</p>
                 </div>
-                <div class="text-right">
-                    <p class="text-xs text-gray-400">Số dư</p>
-                    <span id="balance-display" class="text-lg font-extrabold text-green-400">0 đ</span>
-                </div>
-            </div>
-
-            <!-- THANH ĐIỀU HƯỚNG 3 TAB -->
-            <div class="grid grid-cols-3 gap-2 bg-gray-900 p-1.5 border border-gray-800 rounded-xl text-center">
-                <button onclick="switchDashboardTab('products')" id="dash-tab-products" class="py-2 text-xs font-bold rounded-lg bg-blue-600 text-white transition">Sản Phẩm</button>
-                <button onclick="switchDashboardTab('deposit')" id="dash-tab-deposit" class="py-2 text-xs font-bold rounded-lg text-gray-400 transition">Nạp Tiền</button>
-                <button onclick="switchDashboardTab('account')" id="dash-tab-account" class="py-2 text-xs font-bold rounded-lg text-gray-400 transition">Tài Khoản</button>
-            </div>
-
-            <!-- TAB 1: SẢN PHẨM -->
-            <div id="content-products" class="dash-content space-y-3">
-                <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Netflix Premium (1 Tháng)</h3>
-                        <p class="text-xs text-gray-400">Tài khoản riêng tư, ổn định</p>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-blue-400 font-bold text-sm block mb-1">50.000 đ</span>
-                        <button onclick="alert('Vui lòng nạp thêm tiền vào tài khoản để mua dịch vụ!')" class="bg-blue-600 hover:bg-blue-500 text-xs px-3 py-1.5 rounded-lg font-semibold text-white">Mua ngay</button>
-                    </div>
-                </div>
-                <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex justify-between items-center">
-                    <div>
-                        <h3 class="font-bold text-sm text-white">Spotify Premium (1 Tháng)</h3>
-                        <p class="text-xs text-gray-400">Nâng cấp chính chủ</p>
-                    </div>
-                    <div class="text-right">
-                        <span class="text-blue-400 font-bold text-sm block mb-1">30.000 đ</span>
-                        <button onclick="alert('Vui lòng nạp thêm tiền vào tài khoản để mua dịch vụ!')" class="bg-blue-600 hover:bg-blue-500 text-xs px-3 py-1.5 rounded-lg font-semibold text-white">Mua ngay</button>
-                    </div>
+                <div>
+                    <div class="text-xl font-bold text-indigo-400 mb-3">65.000đ <span class="text-xs text-slate-400 line-through">90.000đ</span></div>
+                    <button onclick="buyProduct('Netflix Premium 1 Tháng', 65000)" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-white font-medium text-sm transition">Mua Ngay</button>
                 </div>
             </div>
 
-            <!-- TAB 2: NẠP TIỀN -->
-            <div id="content-deposit" class="dash-content hidden space-y-3">
-                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 shadow-xl">
-                    <div class="flex items-center space-x-2 mb-3">
-                        <span class="text-xl">🏦</span>
-                        <h3 class="font-bold text-sm text-white">Nạp Tiền Chuyển Khoản</h3>
+            <!-- Sản phẩm 2 -->
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 flex flex-col justify-between hover:border-slate-600 transition">
+                <div>
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl text-xl"><i class="fa-brands fa-spotify"></i></span>
+                        <span class="text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full font-medium">Còn hàng</span>
                     </div>
-                    <p class="text-xs text-gray-400 mb-4">Chuyển khoản chính xác nội dung để hệ thống tự động cộng tiền.</p>
-                    <div class="space-y-2 text-sm bg-gray-950 p-4 rounded-xl border border-gray-800">
-                        <div class="flex justify-between"><span class="text-gray-400">Ngân hàng</span><span class="font-semibold text-white">ACB</span></div>
-                        <div class="flex justify-between"><span class="text-gray-400">Chủ TK</span><span class="font-semibold text-white">NGUYỄN HƯNG THỊNH</span></div>
-                        <div class="flex justify-between"><span class="text-gray-400">Số TK</span><span class="font-semibold text-blue-400 select-all font-mono">20113961</span></div>
-                        <div class="flex justify-between"><span class="text-gray-400">Nội dung</span><span id="transfer-syntax" class="font-bold text-red-400"></span></div>
-                    </div>
+                    <h3 class="font-bold text-lg text-white mb-1">Spotify Premium (Gia hạn)</h3>
+                    <p class="text-slate-400 text-xs mb-4">Gói nâng cấp tài khoản chính chủ 6 tháng nghe nhạc Offline.</p>
+                </div>
+                <div>
+                    <div class="text-xl font-bold text-indigo-400 mb-3">120.000đ <span class="text-xs text-slate-400 line-through">150.000đ</span></div>
+                    <button onclick="buyProduct('Spotify Premium 6 Tháng', 120000)" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-white font-medium text-sm transition">Mua Ngay</button>
                 </div>
             </div>
 
-            <!-- TAB 3: TÀI KHOẢN -->
-            <div id="content-account" class="dash-content hidden space-y-3">
-                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-4">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center font-bold text-lg text-white" id="user-avatar">H</div>
-                        <div>
-                            <h4 id="acc-username" class="font-bold text-white"></h4>
-                            <p class="text-xs text-green-400">Hoạt động bình thường</p>
-                        </div>
+            <!-- Sản phẩm 3 -->
+            <div class="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-5 flex flex-col justify-between hover:border-slate-600 transition">
+                <div>
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="p-3 bg-blue-500/10 text-blue-400 rounded-xl text-xl"><i class="fa-solid fa-robot"></i></span>
+                        <span class="text-xs bg-emerald-500/10 text-emerald-400 px-2.5 py-1 rounded-full font-medium">Còn hàng</span>
                     </div>
-                    <button onclick="handleLogout()" class="w-full bg-red-600/20 hover:bg-red-600 border border-red-800 text-red-300 hover:text-white font-semibold py-2.5 rounded-xl transition text-sm">Đăng Xuất</button>
+                    <h3 class="font-bold text-lg text-white mb-1">ChatGPT Plus (OpenAI)</h3>
+                    <p class="text-slate-400 text-xs mb-4">Tài khoản dùng riêng GPT-4o, DALL-E không giới hạn.</p>
+                </div>
+                <div>
+                    <div class="text-xl font-bold text-indigo-400 mb-3">450.000đ <span class="text-xs text-slate-400 line-through">500.000đ</span></div>
+                    <button onclick="buyProduct('ChatGPT Plus 1 Tháng', 450000)" class="w-full py-2 bg-indigo-600 hover:bg-indigo-500 rounded-xl text-white font-medium text-sm transition">Mua Ngay</button>
                 </div>
             </div>
+        </div>
+    </main>
+
+    <!-- Modal Nạp Tiền VietQR -->
+    <div id="topupModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-sm w-full text-center relative">
+            <button onclick="closeModal('topupModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white mb-2">Nạp Tiền Vào Tài Khoản</h3>
+            <p class="text-xs text-slate-400 mb-4">Quét mã QR dưới đây để hệ thống tự động cộng tiền sau 5 - 15 giây.</p>
+
+            <div class="bg-white p-3 rounded-xl inline-block mb-4 shadow">
+                <!-- Mã VietQR tự động sinh theo thông tin ACB và nội dung nap+user -->
+                <img id="qrCodeImg" class="w-52 h-52 object-contain" src="" alt="VietQR">
+            </div>
+
+            <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-700/60 text-left text-xs space-y-2 mb-4">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Ngân hàng:</span>
+                    <span class="font-semibold text-white">ACB (Á Châu)</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Số tài khoản:</span>
+                    <span class="font-bold text-indigo-400" id="bankNumber">NHAP_STK_ACB_CUA_BAN</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Chủ tài khoản:</span>
+                    <span class="font-semibold text-white">SHOP PREMIUM</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Nội dung CK:</span>
+                    <span id="transferContent" class="font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded">nap+</span>
+                </div>
+            </div>
+
+            <p class="text-[11px] text-amber-400/90"><i class="fa-solid fa-triangle-exclamation"></i> Vui lòng giữ nguyên nội dung chuyển khoản để được cộng tiền tự động.</p>
         </div>
     </div>
 
+    <!-- Modal Đăng nhập -->
+    <div id="loginModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-sm w-full relative">
+            <button onclick="closeModal('loginModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white mb-4 text-center">Đăng Nhập</h3>
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="text-xs text-slate-300 block mb-1">Tên đăng nhập</label>
+                    <input type="text" id="loginUsername" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-300 block mb-1">Mật khẩu</label>
+                    <input type="password" id="loginPassword" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white font-medium text-sm transition">Đăng Nhập</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Đăng ký -->
+    <div id="registerModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 max-w-sm w-full relative">
+            <button onclick="closeModal('registerModal')" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            <h3 class="text-lg font-bold text-white mb-4 text-center">Tạo Tài Khoản Mới</h3>
+            <form onsubmit="handleRegister(event)" class="space-y-4">
+                <div>
+                    <label class="text-xs text-slate-300 block mb-1">Tên đăng nhập</label>
+                    <input type="text" id="regUsername" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <div>
+                    <label class="text-xs text-slate-300 block mb-1">Mật khẩu</label>
+                    <input type="password" id="regPassword" required class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-indigo-500">
+                </div>
+                <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 rounded-lg text-white font-medium text-sm transition">Đăng Ký</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-800 text-center py-4 text-xs text-slate-500">
+        © 2026 ShopPremium - Hệ Thống Bán Hàng Tự Động.
+    </footer>
+
     <script>
-        let currentMode = 'login';
+        // CẤU HÌNH NGÂN HÀNG ACB CỦA BẠN TẠI ĐÂY
+        const BANK_ID = "acb"; // Mã ngân hàng ACB
+        const ACCOUNT_NO = "12345678"; // Thay bằng số tài khoản ACB thật của bạn
+        const ACCOUNT_NAME = "NGUYEN VAN A"; // Thay bằng tên chủ tài khoản ACB của bạn
 
-        function switchTab(mode) {
-            currentMode = mode;
-            const btnLogin = document.getElementById('tab-login-btn');
-            const btnRegister = document.getElementById('tab-register-btn');
-            const submitBtn = document.getElementById('submit-btn');
-            const errorDiv = document.getElementById('error-msg');
-            errorDiv.classList.add('hidden');
+        let currentUser = localStorage.getItem('username');
 
-            if (mode === 'login') {
-                btnLogin.className = "flex-1 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white transition";
-                btnRegister.className = "flex-1 py-2 text-sm font-semibold rounded-lg text-gray-400 transition";
-                submitBtn.innerText = "Đăng Nhập";
+        function openModal(id) {
+            document.getElementById(id).classList.remove('hidden');
+            document.getElementById(id).classList.add('flex');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+            document.getElementById(id).classList.remove('flex');
+        }
+
+        function updateUI() {
+            if (currentUser) {
+                document.getElementById('authSection').classList.add('hidden');
+                document.getElementById('userSection').classList.remove('hidden');
+                document.getElementById('displayUsername').innerText = currentUser;
+                fetchBalance();
             } else {
-                btnRegister.className = "flex-1 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white transition";
-                btnLogin.className = "flex-1 py-2 text-sm font-semibold rounded-lg text-gray-400 transition";
-                submitBtn.innerText = "Đăng Ký";
+                document.getElementById('authSection').classList.remove('hidden');
+                document.getElementById('userSection').classList.add('hidden');
             }
         }
 
-        async function handleSubmit() {
-            const username = document.getElementById('username').value.trim();
-            const password = document.getElementById('password').value.trim();
-            const errorDiv = document.getElementById('error-msg');
+        async function fetchBalance() {
+            if (!currentUser) return;
+            try {
+                const res = await fetch(`/api/user/balance?username=${currentUser}`);
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('userBalance').innerText = data.balance.toLocaleString('vi-VN') + 'đ';
+                }
+            } catch (e) {
+                console.error("Lỗi lấy số dư:", e);
+            }
+        }
 
-            if (!username || !password) {
-                errorDiv.innerText = "Vui lòng nhập đầy đủ thông tin!";
-                errorDiv.classList.remove('hidden');
+        function openTopupModal() {
+            if (!currentUser) {
+                alert("Vui lòng đăng nhập để nạp tiền!");
+                openModal('loginModal');
                 return;
             }
+            const memo = `nap+${currentUser}`;
+            document.getElementById('transferContent').innerText = memo;
+            document.getElementById('bankNumber').innerText = ACCOUNT_NO;
+            
+            // Tạo link VietQR chuẩn ACB
+            const qrUrl = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact.png?addInfo=${encodeURIComponent(memo)}&accountName=${encodeURIComponent(ACCOUNT_NAME)}`;
+            document.getElementById('qrCodeImg').src = qrUrl;
 
-            const endpoint = currentMode === 'login' ? '/api/login' : '/api/register';
-            try {
-                const res = await fetch(endpoint, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-                const data = await res.json();
-
-                if (data.success) {
-                    if (currentMode === 'register') {
-                        alert("Đăng ký thành công! Hãy chuyển sang đăng nhập.");
-                        switchTab('login');
-                    } else {
-                        document.getElementById('auth-section').classList.add('hidden');
-                        document.getElementById('dashboard-section').classList.remove('hidden');
-                        document.getElementById('user-display').innerText = data.username;
-                        document.getElementById('balance-display').innerText = data.balance + " đ";
-                        document.getElementById('transfer-syntax').innerText = "NAP " + data.username;
-                        document.getElementById('acc-username').innerText = data.username;
-                        document.getElementById('user-avatar').innerText = data.username.charAt(0).toUpperCase();
-                        switchDashboardTab('products');
-                    }
-                } else {
-                    errorDiv.innerText = data.message;
-                    errorDiv.classList.remove('hidden');
-                }
-            } catch (err) {
-                errorDiv.innerText = "Lỗi kết nối đến máy chủ!";
-                errorDiv.classList.remove('hidden');
-            }
+            openModal('topupModal');
         }
 
-        function switchDashboardTab(tabName) {
-            ['products', 'deposit', 'account'].forEach(t => {
-                document.getElementById('content-' + t).classList.add('hidden');
-                document.getElementById('dash-tab-' + t).className = "py-2 text-xs font-bold rounded-lg text-gray-400 transition";
-            });
-            document.getElementById('content-' + tabName).classList.remove('hidden');
-            document.getElementById('dash-tab-' + tabName).className = "py-2 text-xs font-bold rounded-lg bg-blue-600 text-white transition";
-        }
+        async function handleLogin(e) {
+            e.preventDefault();
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
 
-        function handleLogout() {
-            document.getElementById('dashboard-section').classList.add('hidden');
-            document.getElementById('auth-section').classList.remove('hidden');
-            document.getElementById('username').value = '';
-            document.getElementById('password').value = '';
-            switchTab('login');
-        }
-    </script>
-</body>
-</html>
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                bodyQuá tuyệt vời! Hệ thống Webhook và cơ sở dữ liệu MongoDB đã hoạt động ăn khớp 100%: nhận diện đúng cú pháp, tự động cộng tiền và bảo vệ chống trùng giao dịch thành công.
+
+Bây giờ chúng ta sẽ làm 2 bước tiếp theo để hoàn thiện quy trình nạp tiền tự động:
+
+---
+
+### Bước 1: Cập nhật giao diện Nạp Tiền tự động sinh mã VietQR
+Khi khách hàng đăng nhập tài khoản (ví dụ tài khoản **Thinh**), tab **Nạp tiền** trên web sẽ tự động sinh mã VietQR của ngân hàng ACB, kèm sẵn:
+* Số tài khoản ACB của bạn.
+* Nội dung chuyển khoản chuẩn: `nap+<tên_khách>` (khách quét mã bằng app ngân hàng là nội dung tự điền, không sợ khách gõ sai).
+* Tự động làm mới số dư trên web khi nạp thành công mà không cần F5.
+
+Bạn cho tôi xin thông tin tài khoản ACB của bạn:
+1. **Số tài khoản ACB**: ...
+2. **Tên chủ tài khoản (viết không dấu)**: ...
+
+---
+
+### Bước 2: Tự động bắt giao dịch thật từ ACB mà không cần thuê API
+Sau khi hoàn thiện giao diện, chúng ta có 2 phương án miễn phí hoàn toàn để biến động số dư ACB tự bắn về webhook vừa test:
+* **Cách 1 (Dùng điện thoại Android phụ):** Cài app Tasker / Webhook Notification đọc thông báo biến động số dư app ACB ONE rồi tự gửi lệnh về VPS.
+* **Cách 2 (Dùng dịch vụ Webhook miễn phí như SeVaPay / Casso gói Free):** Chỉ cần điền webhook link `http://107.172.157.135/api/webhook/bank` là xong.
+
+Bạn gửi số tài khoản và tên chủ tài khoản ACB để tôi cập nhật giao diện web trước nhé!
