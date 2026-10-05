@@ -117,7 +117,6 @@
             <p class="text-xs text-slate-400 mb-4">Quét mã QR dưới đây để hệ thống tự động cộng tiền sau 5 - 15 giây.</p>
 
             <div class="bg-white p-3 rounded-xl inline-block mb-4 shadow">
-                <!-- Mã VietQR tự động sinh theo thông tin ACB và nội dung nap+user -->
                 <img id="qrCodeImg" class="w-52 h-52 object-contain" src="" alt="VietQR">
             </div>
 
@@ -128,11 +127,11 @@
                 </div>
                 <div class="flex justify-between">
                     <span class="text-slate-400">Số tài khoản:</span>
-                    <span class="font-bold text-indigo-400" id="bankNumber">NHAP_STK_ACB_CUA_BAN</span>
+                    <span class="font-bold text-indigo-400" id="bankNumber">12345678</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-slate-400">Chủ tài khoản:</span>
-                    <span class="font-semibold text-white">SHOP PREMIUM</span>
+                    <span class="font-semibold text-white" id="bankNameDisplay">SHOP PREMIUM</span>
                 </div>
                 <div class="flex justify-between">
                     <span class="text-slate-400">Nội dung CK:</span>
@@ -188,21 +187,27 @@
     </footer>
 
     <script>
-        // CẤU HÌNH NGÂN HÀNG ACB CỦA BẠN TẠI ĐÂY
-        const BANK_ID = "acb"; // Mã ngân hàng ACB
-        const ACCOUNT_NO = "12345678"; // Thay bằng số tài khoản ACB thật của bạn
-        const ACCOUNT_NAME = "NGUYEN VAN A"; // Thay bằng tên chủ tài khoản ACB của bạn
+        // CẤU HÌNH NGÂN HÀNG ACB CỦA BẠN (Sửa STK và Tên tại đây nếu muốn)
+        const BANK_ID = "acb"; 
+        const ACCOUNT_NO = "12345678"; 
+        const ACCOUNT_NAME = "NGUYEN VAN A"; 
 
         let currentUser = localStorage.getItem('username');
 
         function openModal(id) {
-            document.getElementById(id).classList.remove('hidden');
-            document.getElementById(id).classList.add('flex');
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.remove('hidden');
+                el.classList.add('flex');
+            }
         }
 
         function closeModal(id) {
-            document.getElementById(id).classList.add('hidden');
-            document.getElementById(id).classList.remove('flex');
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.add('hidden');
+                el.classList.remove('flex');
+            }
         }
 
         function updateUI() {
@@ -220,10 +225,10 @@
         async function fetchBalance() {
             if (!currentUser) return;
             try {
-                const res = await fetch(`/api/user/balance?username=${currentUser}`);
+                const res = await fetch(`/api/user/balance?username=${encodeURIComponent(currentUser)}`);
                 const data = await res.json();
                 if (data.success) {
-                    document.getElementById('userBalance').innerText = data.balance.toLocaleString('vi-VN') + 'đ';
+                    document.getElementById('userBalance').innerText = Number(data.balance).toLocaleString('vi-VN') + 'đ';
                 }
             } catch (e) {
                 console.error("Lỗi lấy số dư:", e);
@@ -232,15 +237,16 @@
 
         function openTopupModal() {
             if (!currentUser) {
-                alert("Vui lòng đăng nhập để nạp tiền!");
+                alert("Vui lòng đăng nhập trước khi nạp tiền!");
                 openModal('loginModal');
                 return;
             }
             const memo = `nap+${currentUser}`;
             document.getElementById('transferContent').innerText = memo;
             document.getElementById('bankNumber').innerText = ACCOUNT_NO;
+            document.getElementById('bankNameDisplay').innerText = ACCOUNT_NAME;
             
-            // Tạo link VietQR chuẩn ACB
+            // Link tạo VietQR chuẩn ACB
             const qrUrl = `https://img.vietqr.io/image/${BANK_ID}-${ACCOUNT_NO}-compact.png?addInfo=${encodeURIComponent(memo)}&accountName=${encodeURIComponent(ACCOUNT_NAME)}`;
             document.getElementById('qrCodeImg').src = qrUrl;
 
@@ -252,30 +258,66 @@
             const username = document.getElementById('loginUsername').value.trim();
             const password = document.getElementById('loginPassword').value;
 
-            const res = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                bodyQuá tuyệt vời! Hệ thống Webhook và cơ sở dữ liệu MongoDB đã hoạt động ăn khớp 100%: nhận diện đúng cú pháp, tự động cộng tiền và bảo vệ chống trùng giao dịch thành công.
+            try {
+                const res = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    currentUser = data.username;
+                    localStorage.setItem('username', currentUser);
+                    closeModal('loginModal');
+                    updateUI();
+                } else {
+                    alert(data.message);
+                }
+            } catch (err) {
+                alert("Lỗi kết nối máy chủ!");
+            }
+        }
 
-Bây giờ chúng ta sẽ làm 2 bước tiếp theo để hoàn thiện quy trình nạp tiền tự động:
+        async function handleRegister(e) {
+            e.preventDefault();
+            const username = document.getElementById('regUsername').value.trim();
+            const password = document.getElementById('regPassword').value;
 
----
+            try {
+                const res = await fetch('/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+                alert(data.message);
+                if (data.success) {
+                    closeModal('registerModal');
+                    openModal('loginModal');
+                }
+            } catch (err) {
+                alert("Lỗi kết nối máy chủ!");
+            }
+        }
 
-### Bước 1: Cập nhật giao diện Nạp Tiền tự động sinh mã VietQR
-Khi khách hàng đăng nhập tài khoản (ví dụ tài khoản **Thinh**), tab **Nạp tiền** trên web sẽ tự động sinh mã VietQR của ngân hàng ACB, kèm sẵn:
-* Số tài khoản ACB của bạn.
-* Nội dung chuyển khoản chuẩn: `nap+<tên_khách>` (khách quét mã bằng app ngân hàng là nội dung tự điền, không sợ khách gõ sai).
-* Tự động làm mới số dư trên web khi nạp thành công mà không cần F5.
+        function logout() {
+            localStorage.removeItem('username');
+            currentUser = null;
+            updateUI();
+        }
 
-Bạn cho tôi xin thông tin tài khoản ACB của bạn:
-1. **Số tài khoản ACB**: ...
-2. **Tên chủ tài khoản (viết không dấu)**: ...
+        function buyProduct(name, price) {
+            if (!currentUser) {
+                alert("Vui lòng đăng nhập trước khi mua hàng!");
+                openModal('loginModal');
+                return;
+            }
+            alert(`Bạn chọn mua gói ${name} với giá ${price.toLocaleString('vi-VN')}đ.`);
+        }
 
----
-
-### Bước 2: Tự động bắt giao dịch thật từ ACB mà không cần thuê API
-Sau khi hoàn thiện giao diện, chúng ta có 2 phương án miễn phí hoàn toàn để biến động số dư ACB tự bắn về webhook vừa test:
-* **Cách 1 (Dùng điện thoại Android phụ):** Cài app Tasker / Webhook Notification đọc thông báo biến động số dư app ACB ONE rồi tự gửi lệnh về VPS.
-* **Cách 2 (Dùng dịch vụ Webhook miễn phí như SeVaPay / Casso gói Free):** Chỉ cần điền webhook link `http://107.172.157.135/api/webhook/bank` là xong.
-
-Bạn gửi số tài khoản và tên chủ tài khoản ACB để tôi cập nhật giao diện web trước nhé!
+        // Chạy khi tải trang
+        updateUI();
+        setInterval(fetchBalance, 5000);
+    </script>
+</body>
+</html>
