@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-// 2. Bảng Lịch sử giao dịch (Chống cộng tiền lặp)
+// 2. Bảng Lịch sử giao dịch (Chống nạp lặp mã)
 const transactionSchema = new mongoose.Schema({
     transactionId: { type: String, required: true, unique: true },
     amount: { type: Number, required: true },
@@ -73,7 +73,7 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// API Lấy số dư mới nhất của tài khoản
+// API Lấy số dư mới nhất
 app.get('/api/user/balance', async (req, res) => {
     try {
         const { username } = req.query;
@@ -104,13 +104,13 @@ app.post('/api/webhook/bank', async (req, res) => {
             return res.json({ success: false, message: "Thiếu dữ liệu giao dịch!" });
         }
 
-        // 1. Kiểm tra mã giao dịch xem đã cộng trước đó chưa
+        // Kiểm tra xem mã GD đã cộng chưa
         const isExisted = await Transaction.findOne({ transactionId });
         if (isExisted) {
             return res.json({ success: false, message: "Giao dịch này đã được cộng trước đó!" });
         }
 
-        // 2. Nhận diện cú pháp: nap username HOẶC nap+username (chấp nhận cả dấu cách hoặc dấu cộng)
+        // Nhận diện cú pháp: nap username HOẶC nap+username
         const match = description.match(/nap[\s\+]+([a-zA-Z0-9_]+)/i);
         if (!match) {
             return res.json({ success: false, message: "Nội dung chuyển khoản không đúng cú pháp: nap username" });
@@ -118,13 +118,13 @@ app.post('/api/webhook/bank', async (req, res) => {
 
         const username = match[1].toLowerCase();
 
-        // 3. Tìm tài khoản trong database
+        // Tìm tài khoản
         const user = await User.findOne({ username: new RegExp(`^${username}$`, 'i') });
         if (!user) {
             return res.json({ success: false, message: `Không tìm thấy tài khoản: ${username}` });
         }
 
-        // 4. Cộng tiền & ghi log lịch sử
+        // Cộng tiền và lưu log
         user.balance += Number(amount);
         await user.save();
 
@@ -141,42 +141,6 @@ app.post('/api/webhook/bank', async (req, res) => {
     } catch (err) {
         console.error("Lỗi Webhook:", err);
         return res.status(500).json({ success: false, message: "Lỗi hệ thống Webhook" });
-    }
-});
-
-app.listen(PORT, () => {
-    console.log(`Shop Premium dang chay tai port ${PORT}`);
-});
-
-    try {
-        const { username, password } = req.body;
-        if (!username || !password) {
-            return res.json({ success: false, message: "Vui lòng nhập đầy đủ thông tin!" });
-        }
-        const existingUser = await User.findOne({ username });
-        if (existingUser) {
-            return res.json({ success: false, message: "Tài khoản đã tồn tại!" });
-        }
-        const newUser = new User({ username, password, balance: 0 });
-        await newUser.save();
-        res.json({ success: true, message: "Đăng ký thành công!" });
-    } catch (err) {
-        res.json({ success: false, message: "Lỗi hệ thống khi đăng ký!" });
-    }
-});
-
-// API Đăng nhập kiểm tra từ Database
-app.post('/api/login', async (req, res) => {
-    try {
-        const { username, password } = req.body;
-        const user = await User.findOne({ username, password });
-        if (user) {
-            res.json({ success: true, message: "Đăng nhập thành công!", username: user.username, balance: user.balance });
-        } else {
-            res.json({ success: false, message: "Sai tên đăng nhập hoặc mật khẩu!" });
-        }
-    } catch (err) {
-        res.json({ success: false, message: "Lỗi hệ thống khi đăng nhập!" });
     }
 });
 
