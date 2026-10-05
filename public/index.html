@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop Premium</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col justify-between">
+    <div class="max-w-md mx-auto w-full p-4 flex-grow flex flex-col justify-center">
+        
+        <!-- MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ -->
+        <div id="auth-section" class="bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl">
+            <h1 class="text-2xl font-bold text-center mb-2 text-white">Shop Premium</h1>
+            <p class="text-sm text-center text-gray-400 mb-6">Hệ thống tự động chính chủ</p>
+            
+            <div class="flex bg-gray-800 p-1 rounded-xl mb-6">
+                <button onclick="switchTab('login')" id="tab-login-btn" class="flex-1 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white transition">Đăng Nhập</button>
+                <button onclick="switchTab('register')" id="tab-register-btn" class="flex-1 py-2 text-sm font-semibold rounded-lg text-gray-400 transition">Đăng Ký</button>
+            </div>
+
+            <div id="error-msg" class="hidden mb-4 p-3 bg-red-950/50 border border-red-800 text-red-300 text-sm rounded-xl text-center"></div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Tên đăng nhập</label>
+                    <input type="text" id="username" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500" placeholder="Nhập tên đăng nhập">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-400 mb-1">Mật khẩu</label>
+                    <input type="password" id="password" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-blue-500" placeholder="Nhập mật khẩu">
+                </div>
+                <button onclick="handleSubmit()" id="submit-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-blue-600/30">Đăng Nhập</button>
+            </div>
+        </div>
+
+        <!-- MÀN HÌNH CHÍNH SAU KHI ĐĂNG NHẬP -->
+        <div id="dashboard-section" class="hidden space-y-4">
+            <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 flex justify-between items-center shadow-xl">
+                <div>
+                    <p class="text-xs text-gray-400">Xin chào,</p>
+                    <h2 id="user-display" class="text-lg font-bold text-white"></h2>
+                    <span class="text-xs bg-blue-950 text-blue-400 px-2 py-0.5 rounded-full border border-blue-800">Hệ thống tự động</span>
+                </div>
+                <div class="text-right">
+                    <p class="text-xs text-gray-400">Số dư</p>
+                    <span id="balance-display" class="text-lg font-extrabold text-green-400">0 đ</span>
+                </div>
+            </div>
+
+            <!-- THANH ĐIỀU HƯỚNG 3 TAB -->
+            <div class="grid grid-cols-3 gap-2 bg-gray-900 p-1.5 border border-gray-800 rounded-xl text-center">
+                <button onclick="switchDashboardTab('products')" id="dash-tab-products" class="py-2 text-xs font-bold rounded-lg bg-blue-600 text-white transition">Sản Phẩm</button>
+                <button onclick="switchDashboardTab('deposit')" id="dash-tab-deposit" class="py-2 text-xs font-bold rounded-lg text-gray-400 transition">Nạp Tiền</button>
+                <button onclick="switchDashboardTab('account')" id="dash-tab-account" class="py-2 text-xs font-bold rounded-lg text-gray-400 transition">Tài Khoản</button>
+            </div>
+
+            <!-- TAB 1: SẢN PHẨM -->
+            <div id="content-products" class="dash-content space-y-3">
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold text-sm text-white">Netflix Premium (1 Tháng)</h3>
+                        <p class="text-xs text-gray-400">Tài khoản riêng tư, ổn định</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-blue-400 font-bold text-sm block mb-1">50.000 đ</span>
+                        <button onclick="alert('Vui lòng nạp thêm tiền vào tài khoản để mua dịch vụ!')" class="bg-blue-600 hover:bg-blue-500 text-xs px-3 py-1.5 rounded-lg font-semibold text-white">Mua ngay</button>
+                    </div>
+                </div>
+                <div class="bg-gray-900 border border-gray-800 rounded-xl p-4 flex justify-between items-center">
+                    <div>
+                        <h3 class="font-bold text-sm text-white">Spotify Premium (1 Tháng)</h3>
+                        <p class="text-xs text-gray-400">Nâng cấp chính chủ</p>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-blue-400 font-bold text-sm block mb-1">30.000 đ</span>
+                        <button onclick="alert('Vui lòng nạp thêm tiền vào tài khoản để mua dịch vụ!')" class="bg-blue-600 hover:bg-blue-500 text-xs px-3 py-1.5 rounded-lg font-semibold text-white">Mua ngay</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: NẠP TIỀN -->
+            <div id="content-deposit" class="dash-content hidden space-y-3">
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 shadow-xl">
+                    <div class="flex items-center space-x-2 mb-3">
+                        <span class="text-xl">🏦</span>
+                        <h3 class="font-bold text-sm text-white">Nạp Tiền Chuyển Khoản</h3>
+                    </div>
+                    <p class="text-xs text-gray-400 mb-4">Chuyển khoản chính xác nội dung để hệ thống tự động cộng tiền.</p>
+                    <div class="space-y-2 text-sm bg-gray-950 p-4 rounded-xl border border-gray-800">
+                        <div class="flex justify-between"><span class="text-gray-400">Ngân hàng</span><span class="font-semibold text-white">ACB</span></div>
+                        <div class="flex justify-between"><span class="text-gray-400">Chủ TK</span><span class="font-semibold text-white">NGUYỄN HƯNG THỊNH</span></div>
+                        <div class="flex justify-between"><span class="text-gray-400">Số TK</span><span class="font-semibold text-blue-400 select-all font-mono">20113961</span></div>
+                        <div class="flex justify-between"><span class="text-gray-400">Nội dung</span><span id="transfer-syntax" class="font-bold text-red-400"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: TÀI KHOẢN -->
+            <div id="content-account" class="dash-content hidden space-y-3">
+                <div class="bg-gray-900 border border-gray-800 rounded-2xl p-5 space-y-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center font-bold text-lg text-white" id="user-avatar">H</div>
+                        <div>
+                            <h4 id="acc-username" class="font-bold text-white"></h4>
+                            <p class="text-xs text-green-400">Hoạt động bình thường</p>
+                        </div>
+                    </div>
+                    <button onclick="handleLogout()" class="w-full bg-red-600/20 hover:bg-red-600 border border-red-800 text-red-300 hover:text-white font-semibold py-2.5 rounded-xl transition text-sm">Đăng Xuất</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'login';
+
+        function switchTab(mode) {
+            currentMode = mode;
+            const btnLogin = document.getElementById('tab-login-btn');
+            const btnRegister = document.getElementById('tab-register-btn');
+            const submitBtn = document.getElementById('submit-btn');
+            const errorDiv = document.getElementById('error-msg');
+            errorDiv.classList.add('hidden');
+
+            if (mode === 'login') {
+                btnLogin.className = "flex-1 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white transition";
+                btnRegister.className = "flex-1 py-2 text-sm font-semibold rounded-lg text-gray-400 transition";
+                submitBtn.innerText = "Đăng Nhập";
+            } else {
+                btnRegister.className = "flex-1 py-2 text-sm font-semibold rounded-lg bg-blue-600 text-white transition";
+                btnLogin.className = "flex-1 py-2 text-sm font-semibold rounded-lg text-gray-400 transition";
+                submitBtn.innerText = "Đăng Ký";
+            }
+        }
+
+        async function handleSubmit() {
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value.trim();
+            const errorDiv = document.getElementById('error-msg');
+
+            if (!username || !password) {
+                errorDiv.innerText = "Vui lòng nhập đầy đủ thông tin!";
+                errorDiv.classList.remove('hidden');
+                return;
+            }
+
+            const endpoint = currentMode === 'login' ? '/api/login' : '/api/register';
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    if (currentMode === 'register') {
+                        alert("Đăng ký thành công! Hãy chuyển sang đăng nhập.");
+                        switchTab('login');
+                    } else {
+                        document.getElementById('auth-section').classList.add('hidden');
+                        document.getElementById('dashboard-section').classList.remove('hidden');
+                        document.getElementById('user-display').innerText = data.username;
+                        document.getElementById('balance-display').innerText = data.balance + " đ";
+                        document.getElementById('transfer-syntax').innerText = "NAP " + data.username;
+                        document.getElementById('acc-username').innerText = data.username;
+                        document.getElementById('user-avatar').innerText = data.username.charAt(0).toUpperCase();
+                        switchDashboardTab('products');
+                    }
+                } else {
+                    errorDiv.innerText = data.message;
+                    errorDiv.classList.remove('hidden');
+                }
+            } catch (err) {
+                errorDiv.innerText = "Lỗi kết nối đến máy chủ!";
+                errorDiv.classList.remove('hidden');
+            }
+        }
+
+        function switchDashboardTab(tabName) {
+            ['products', 'deposit', 'account'].forEach(t => {
+                document.getElementById('content-' + t).classList.add('hidden');
+                document.getElementById('dash-tab-' + t).className = "py-2 text-xs font-bold rounded-lg text-gray-400 transition";
+            });
+            document.getElementById('content-' + tabName).classList.remove('hidden');
+            document.getElementById('dash-tab-' + tabName).className = "py-2 text-xs font-bold rounded-lg bg-blue-600 text-white transition";
+        }
+
+        function handleLogout() {
+            document.getElementById('dashboard-section').classList.add('hidden');
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            switchTab('login');
+        }
+    </script>
+</body>
+</html>
