@@ -13,7 +13,7 @@ mongoose.connect(MONGO_URI)
     .then(() => console.log('Ket noi MongoDB thanh cong!'))
     .catch(err => console.error('Loi ket noi MongoDB:', err));
 
-// 1. Bảng User
+// 1. Schema Người dùng
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     password: { type: String, required: true },
@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-// 2. Bảng Lịch sử giao dịch (Chống nạp trùng)
+// 2. Schema Giao dịch (Chống nạp trùng)
 const transactionSchema = new mongoose.Schema({
     transactionId: { type: String, required: true, unique: true },
     amount: { type: Number, required: true },
@@ -36,7 +36,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Mã bí mật cấu hình trên SePay (API Key)
+// Khóa bảo mật Webhook (Trùng khớp cấu hình trên SePay)
 const SEPAY_API_KEY = "ShopPremium_Secret_2026";
 
 // API Đăng ký
@@ -88,12 +88,12 @@ app.get('/api/user/balance', async (req, res) => {
     }
 });
 
-// ==========================================
-// CỔNG WEBHOOK NHẬN DỮ LIỆU TỪ SEPAY
-// ==========================================
+// =======================================================
+// CỔNG WEBHOOK TỰ ĐỘNG CỘNG TIỀN (CHUẨN SEPAY & DIRECT)
+// =======================================================
 app.post('/api/webhook/bank', async (req, res) => {
     try {
-        // Kiểm tra xác thực SePay (Hỗ trợ cả header Apikey lẫn x-api-key)
+        // Hỗ trợ mọi kiểu truyền Header Authorization từ SePay
         const authHeader = req.headers['authorization'] || '';
         const apiKeyHeader = req.headers['x-api-key'] || '';
 
@@ -102,43 +102,44 @@ app.post('/api/webhook/bank', async (req, res) => {
                         apiKeyHeader === SEPAY_API_KEY;
 
         if (!isValid) {
-            console.log('[SEPAY] Tu choi: Sai ma xac thuc!');
+            console.log('[SEPAY] Từ chối: Sai mã xác thực Header!');
             return res.status(403).json({ success: false, message: "Sai mã xác thực Webhook!" });
         }
 
         const data = req.body;
-        console.log('[SEPAY DATA NHAN DUOC]:', JSON.stringify(data));
+        console.log('[SEPAY NHẬN DỮ LIỆU]:', JSON.stringify(data));
 
-        // Lấy thông tin giao dịch từ SePay (Hỗ trợ linh hoạt các trường)
+        // Nhận diện linh hoạt trường từ gói tin SePay
         const transactionId = String(data.id || data.transactionId || data.referenceCode || Date.now());
         const amount = Number(data.transferAmount || data.amount || 0);
         const description = data.content || data.description || '';
 
+        // Phục vụ nút gửi Test của SePay (Gói test thường chưa có tiền hoặc nội dung nạp)
         if (!amount || !description) {
-            return res.json({ success: false, message: "Thiếu số tiền hoặc nội dung giao dịch" });
+            return res.status(200).json({ success: true, message: "Kiểm tra kết nối Webhook thành công!" });
         }
 
-        // Chống cộng tiền trùng lặp giao dịch
+        // Chống lặp giao dịch
         const isExisted = await Transaction.findOne({ transactionId });
         if (isExisted) {
-            return res.json({ success: false, message: "Giao dịch này đã được cộng trước đó!" });
+            return res.status(200).json({ success: true, message: "Giao dịch này đã được ghi nhận trước đó" });
         }
 
-        // Nhận diện cú pháp: nap thinh, napthinh hoặc nap+thinh
+        // Bóc tách cú pháp: nap thinh, napthinh, hoặc nap+thinh
         const match = description.match(/nap[\s\+]*([a-zA-Z0-9_]+)/i);
         if (!match) {
-            return res.json({ success: false, message: "Nội dung chuyển khoản không có cú pháp nạp" });
+            return res.status(200).json({ success: false, message: "Nội dung chuyển khoản không chứa cú pháp nạp" });
         }
 
         const username = match[1].toLowerCase();
 
-        // Tìm tài khoản
+        // Tìm kiếm tài khoản trong MongoDB
         const user = await User.findOne({ username: new RegExp(`^${username}$`, 'i') });
         if (!user) {
-            return res.json({ success: false, message: `Không tìm thấy tài khoản: ${username}` });
+            return res.status(200).json({ success: false, message: `Không tìm thấy tài khoản: ${username}` });
         }
 
-        // Tự động cộng tiền và ghi log
+        // Tự động cộng tiền và lưu lịch sử
         user.balance += amount;
         await user.save();
 
@@ -149,15 +150,15 @@ app.post('/api/webhook/bank', async (req, res) => {
             description
         });
 
-        console.log(`[SEPAY THANH CONG] User: ${user.username} | +${amount}d | Ma GD: ${transactionId}`);
-        return res.json({ success: true, message: `Đã cộng ${amount}đ cho tài khoản ${user.username}` });
+        console.log(`[SEPAY THÀNH CÔNG] Tài khoản: ${user.username} | +${amount}đ | Mã GD: ${transactionId}`);
+        return res.status(200).json({ success: true, message: `Đã cộng ${amount}đ cho tài khoản ${user.username}` });
 
     } catch (err) {
-        console.error("Lỗi Webhook SePay:", err);
-        return res.status(500).json({ success: false, message: "Lỗi máy chủ" });
+        console.error("Lỗi xử lý Webhook:", err);
+        return res.status(500).json({ success: false, message: "Lỗi máy chủ nội bộ" });
     }
 });
 
 app.listen(PORT, () => {
-    console.log(`Shop Premium dang chay tai port ${PORT}`);
+    console.log(`Shop Premium đang chạy tại cổng ${PORT}`);
 });
