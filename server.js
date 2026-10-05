@@ -21,7 +21,7 @@ const userSchema = new mongoose.Schema({
 });
 const User = mongoose.model('User', userSchema);
 
-// 2. Bảng Lịch sử giao dịch (Chống nạp lặp mã)
+// 2. Bảng Lịch sử giao dịch (Chống nạp trùng)
 const transactionSchema = new mongoose.Schema({
     transactionId: { type: String, required: true, unique: true },
     amount: { type: Number, required: true },
@@ -36,8 +36,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Mã bí mật bảo vệ Webhook
-const WEBHOOK_SECRET_KEY = "ShopPremium_Secret_2026";
+// Mã bí mật cấu hình trên SePay (API Key)
+const SEPAY_API_KEY = "ShopPremium_Secret_2026";
 
 // API Đăng ký
 app.post('/api/register', async (req, res) => {
@@ -89,31 +89,45 @@ app.get('/api/user/balance', async (req, res) => {
 });
 
 // ==========================================
-// CỔNG WEBHOOK TỰ ĐỘNG CỘNG TIỀN ACB / BANK
+// CỔNG WEBHOOK NHẬN DỮ LIỆU TỪ SEPAY
 // ==========================================
 app.post('/api/webhook/bank', async (req, res) => {
     try {
-        const secret = req.headers['x-api-key'] || req.body.secret;
-        if (secret !== WEBHOOK_SECRET_KEY) {
-            return res.status(403).json({ success: false, message: "Sai mã bí mật Webhook!" });
+        // Kiểm tra xác thực SePay (Hỗ trợ cả header Apikey lẫn x-api-key)
+        const authHeader = req.headers['authorization'] || '';
+        const apiKeyHeader = req.headers['x-api-key'] || '';
+
+        const isValid = authHeader === `Apikey ${SEPAY_API_KEY}` || 
+                        authHeader === SEPAY_API_KEY || 
+                        apiKeyHeader === SEPAY_API_KEY;
+
+        if (!isValid) {
+            console.log('[SEPAY] Tu choi: Sai ma xac thuc!');
+            return res.status(403).json({ success: false, message: "Sai mã xác thực Webhook!" });
         }
 
-        const { transactionId, amount, description } = req.body;
+        const data = req.body;
+        console.log('[SEPAY DATA NHAN DUOC]:', JSON.stringify(data));
 
-        if (!transactionId || !amount || !description) {
-            return res.json({ success: false, message: "Thiếu dữ liệu giao dịch!" });
+        // Lấy thông tin giao dịch từ SePay (Hỗ trợ linh hoạt các trường)
+        const transactionId = String(data.id || data.transactionId || data.referenceCode || Date.now());
+        const amount = Number(data.transferAmount || data.amount || 0);
+        const description = data.content || data.description || '';
+
+        if (!amount || !description) {
+            return res.json({ success: false, message: "Thiếu số tiền hoặc nội dung giao dịch" });
         }
 
-        // Kiểm tra xem mã GD đã cộng chưa
+        // Chống cộng tiền trùng lặp giao dịch
         const isExisted = await Transaction.findOne({ transactionId });
         if (isExisted) {
             return res.json({ success: false, message: "Giao dịch này đã được cộng trước đó!" });
         }
 
-        // Nhận diện cú pháp: nap username HOẶC nap+username
-        const match = description.match(/nap[\s\+]+([a-zA-Z0-9_]+)/i);
+        // Nhận diện cú pháp: nap thinh, napthinh hoặc nap+thinh
+        const match = description.match(/nap[\s\+]*([a-zA-Z0-9_]+)/i);
         if (!match) {
-            return res.json({ success: false, message: "Nội dung chuyển khoản không đúng cú pháp: nap username" });
+            return res.json({ success: false, message: "Nội dung chuyển khoản không có cú pháp nạp" });
         }
 
         const username = match[1].toLowerCase();
@@ -124,23 +138,23 @@ app.post('/api/webhook/bank', async (req, res) => {
             return res.json({ success: false, message: `Không tìm thấy tài khoản: ${username}` });
         }
 
-        // Cộng tiền và lưu log
-        user.balance += Number(amount);
+        // Tự động cộng tiền và ghi log
+        user.balance += amount;
         await user.save();
 
         await Transaction.create({
             transactionId,
-            amount: Number(amount),
+            amount,
             username: user.username,
             description
         });
 
-        console.log(`[NAP TIEN THANH CONG] Tai khoan: ${user.username} | +${amount}d | Ma GD: ${transactionId}`);
+        console.log(`[SEPAY THANH CONG] User: ${user.username} | +${amount}d | Ma GD: ${transactionId}`);
         return res.json({ success: true, message: `Đã cộng ${amount}đ cho tài khoản ${user.username}` });
 
     } catch (err) {
-        console.error("Lỗi Webhook:", err);
-        return res.status(500).json({ success: false, message: "Lỗi hệ thống Webhook" });
+        console.error("Lỗi Webhook SePay:", err);
+        return res.status(500).json({ success: false, message: "Lỗi máy chủ" });
     }
 });
 
